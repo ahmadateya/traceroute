@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/aeden/traceroute"
 	"net"
+	"os"
 )
 
 func printHop(hop traceroute.TracerouteHop) {
@@ -24,18 +26,7 @@ func address(address [4]byte) string {
 	return fmt.Sprintf("%v.%v.%v.%v", address[0], address[1], address[2], address[3])
 }
 
-func main() {
-	var m = flag.Int("m", traceroute.DEFAULT_MAX_HOPS, `Set the max time-to-live (max number of hops) used in outgoing probe packets (default is 64)`)
-	var f = flag.Int("f", traceroute.DEFAULT_FIRST_HOP, `Set the first used time-to-live, e.g. the first hop (default is 1)`)
-	var q = flag.Int("q", 1, `Set the number of probes per "ttl" to nqueries (default is one probe).`)
-
-	flag.Parse()
-	host := flag.Arg(0)
-	options := traceroute.TracerouteOptions{}
-	options.SetRetries(*q - 1)
-	options.SetMaxHops(*m + 1)
-	options.SetFirstHop(*f)
-
+func GoTraceroute(host string, options traceroute.TracerouteOptions, pathToSave string) {
 	ipAddr, err := net.ResolveIPAddr("ip", host)
 	if err != nil {
 		return
@@ -55,8 +46,29 @@ func main() {
 		}
 	}()
 
-	_, err = traceroute.Traceroute(host, &options, c)
+	result, err := traceroute.Traceroute(host, &options, c)
 	if err != nil {
 		fmt.Printf("Error: ", err)
 	}
+
+	if pathToSave != "" {
+		f, _ := os.Create(fmt.Sprintf("%s/%s.json", pathToSave, host))
+		b, _ := json.Marshal(result)
+		fmt.Fprintf(f, "%v", string(b))
+	}
+}
+
+func main() {
+	var m = flag.Int("m", traceroute.DEFAULT_MAX_HOPS, `Set the max time-to-live (max number of hops) used in outgoing probe packets (default is 64)`)
+	var f = flag.Int("f", traceroute.DEFAULT_FIRST_HOP, `Set the first used time-to-live, e.g. the first hop (default is 1)`)
+	var q = flag.Int("q", 1, `Set the number of probes per "ttl" to nqueries (default is one probe).`)
+
+	flag.Parse()
+	host := flag.Arg(0)
+	options := traceroute.TracerouteOptions{}
+	options.SetRetries(*q - 1)
+	options.SetMaxHops(*m + 1)
+	options.SetFirstHop(*f)
+
+	GoTraceroute(host, options, "./tmp")
 }

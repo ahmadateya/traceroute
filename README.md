@@ -1,5 +1,7 @@
 # Traceroute in Go
 
+## This package is forked originally from [traceroute](https://github.com/aeden/traceroute)
+
 A traceroute library written in Go.
 
 Must be run as sudo on OS X (and others)?
