@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/aeden/traceroute"
+	"github.com/ahmadateya/traceroute"
 	"net"
 	"os"
 )
