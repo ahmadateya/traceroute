@@ -9,8 +9,8 @@ Must be run as sudo on OS X (and others)?
 ## CLI App
 
 ```sh
-go build cmd/gotraceroute
-sudo ./gotraceroute example.com
+go build main.go -o traceroute
+sudo ./main  example.com
 ```
 
 ## Library
